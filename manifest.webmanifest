@@ -1,0 +1,20 @@
+{
+  "name": "Auth Gateway Generator",
+  "short_name": "AuthGate",
+  "description": "One-click Better Auth gateway for Next.js projects",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1A1814",
+  "theme_color": "#1A1814",
+  "lang": "sk",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
