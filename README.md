@@ -1,63 +1,57 @@
 # Auth Gateway Generator
 
-Statický PWA blueprint. Jedným tlačidlom vygeneruje platnú Better Auth bránu pre Next.js App Router.
+Statická PWA, ktorá lokálne v prehliadači vygeneruje predajný auth ZIP. Cena produktu je **49 € jednorazovo, lifetime pre túto verziu**. Checkout URL je jediný konfiguračný payment hook v `index.html` (`CHECKOUT_URL`). Aplikácia nemá účty, licenčný backend ani predstierané webhook overenie.
 
-Tento priečinok je **samotný generátor**. ZIP, ktorý appka vypľuje, je **auth kód do nového projektu**.
-
-## Spustenie lokálne
-
-Otvor `index.html` v prehliadači, alebo:
+## Spustenie
 
 ```bash
 npx serve .
 ```
 
-## Deploy na store / hosting (generátor)
+## Testy
 
-Všetko je statické. Žiadny backend.
-
-### Vercel
 ```bash
-npx vercel .
+node tests/regression.test.js
 ```
 
-### Netlify
-```bash
-npx netlify deploy --prod --dir .
-```
+Očakávaný výsledok: `10/10`.
 
-### GitHub Pages
-1. Push tento priečinok do repo
-2. Settings → Pages → Deploy from branch `/` alebo `/docs`
-3. Ak je projekt v podpriečinku, skontroluj relatívne cesty (`./sw.js`, `./manifest.webmanifest`)
+## Next.js ZIP
 
-### Cloudflare Pages
-Upload priečinka alebo napoj Git. Build command nechaj prázdny, output `.`
+Root archívu je `auth-gateway/` a predajný ZIP obsahuje:
 
-### Capacitor → Play Store / App Store
-```bash
-npm init -y
-npm i @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
-npx cap init AuthGate com.example.authgate --web-dir .
-npx cap add android
-npx cap add ios
-npx cap sync
-```
-Potom otvor Android Studio / Xcode a buildni store bundle.
+- `lib/auth.ts`
+- `lib/prisma.ts`
+- `lib/auth-client.ts`
+- `app/api/auth/[...all]/route.ts`
+- `components/sign-in-form.tsx`
+- `middleware.ts`
+- `prisma/schema.prisma`
+- `.env.example`
+- `INSTALL.md`
 
-### PWA install
-HTTPS hosting + manifest + service worker. Tlačidlo „Nainštalovať PWA“ sa ukáže, keď prehliadač pošle `beforeinstallprompt`.
+`preview/login.html` slúži iba pre UI generátora a do predajného ZIPu nejde. SQLite nastaví Prisma provider `sqlite` a `DATABASE_URL=file:./dev.db`; každý iný výber pre Next.js ostáva `postgresql`, vrátane voľby MySQL v UI.
 
-## Čo brána obsahuje
+## PHP ZIP
 
-- `lib/auth.ts` — Better Auth + Prisma adapter + `nextCookies`
-- `app/api/auth/[...all]/route.ts` — oficiálny Next handler
-- `lib/auth-client.ts` — React client
-- `components/sign-in-form.tsx` — Google / GitHub / email
-- `middleware.ts` — ochrana `/dashboard` cez session cookie
-- `prisma/schema.prisma` — Better Auth tabuľky
-- `.env.example` + `INSTALL.md`
+Vždy obsahuje:
 
-## Stack brány
+- `config.php`
+- `auth.php`
+- `login.php`
+- `register.php`
+- `dashboard.php`
+- `logout.php`
+- `schema.sql`
+- `assets/auth.css`
+- `INSTALL.md`
 
-Next.js App Router · TypeScript · Better Auth · Prisma · PostgreSQL alebo SQLite
+Ak je zapnutý Google alebo GitHub, pridá sa `oauth.php` s authorize redirectom, `hash_equals` kontrolou state, server-side token exchange, načítaním emailu, upsertom používateľa, `login_user()` a redirectom na dashboard. Bez social providerov `oauth.php` nevznikne.
+
+## ZIP a PWA
+
+ZIP sa skladá lokálne cez `vendor/jszip.min.js`; produkcia nepoužíva CDN pre ZIP knižnicu. Service worker precacheuje `generator.js` aj vendored ZIP knižnicu.
+
+## Pred ostrým predajom
+
+V `index.html` nahraď `https://buy.stripe.com/REPLACE` reálnym Stripe Payment Linkom alebo Gumroad URL a doplň obchodné meno, IČO a povinné právne údaje. Repozitár žiadne IČO nevymýšľa.
